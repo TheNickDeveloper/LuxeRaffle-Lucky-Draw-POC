@@ -1,20 +1,59 @@
+# LuxeRaffle - High Performance Lucky Draw
+
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+  <img src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" alt="LuxeRaffle Banner" width="800" />
 </div>
 
-# Run and deploy your AI Studio app
+A premium, high-performance lucky draw application built with React, TypeScript, and Tailwind CSS. Features smooth animations, particle effects, and a history tracking system.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/drive/1eq5XgxrM-2SerUXyxHXJjwGqZX51kmUR
+- ✨ **Premium UI**: Glassmorphism design with particle effects
+- 🎯 **Fair Drawing**: Random selection with exclusion logic
+- 📜 **History Tracking**: Keep track of previous rounds and winners
+- 💾 **State Persistence**: Data persists during the session
+- 📱 **Responsive**: Works beautifully on desktop and mobile
 
-## Run Locally
+## Getting Started
 
-**Prerequisites:**  Node.js
+### Prerequisites
 
+- Node.js (v18 or higher)
+- npm (v9 or higher)
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/TheNickDeveloper/LuxeRaffle-Lucky-Draw-POC.git
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+## Deployment
+
+This project is configured for automatic deployment to GitHub Pages.
+
+1. Go to your repository settings on GitHub.
+2. Navigate to **Actions** > **General**.
+3. Under **Workflow permissions**, select **Read and write permissions**.
+4. Push your changes to the `main` branch.
+5. The GitHub Action will automatically build and deploy the site.
+
+## Technologies
+
+- [React](https://reactjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Framer Motion](https://www.framer.com/motion/)
+- [Vite](https://vitejs.dev/)

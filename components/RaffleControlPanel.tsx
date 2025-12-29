@@ -12,11 +12,11 @@ interface Props {
   availableCount: number;
 }
 
-const RaffleControlPanel: React.FC<Props> = ({ 
-  participants, 
-  setParticipants, 
-  settings, 
-  setSettings, 
+const RaffleControlPanel: React.FC<Props> = ({
+  participants,
+  setParticipants,
+  settings,
+  setSettings,
   onClear,
   isDrawing,
   availableCount
@@ -25,22 +25,32 @@ const RaffleControlPanel: React.FC<Props> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (participants.length === 0 && inputValue !== "") {
-      setInputValue("");
-    } else if (participants.length > 0 && (inputValue === "" || participants.length !== inputValue.split(/[;\n]+/).filter(x => x.trim()).length)) {
-        setInputValue(participants.join('\n'));
+    // When participants list changes (e.g. cleared externally), sync input value
+    // Only update if the parsed content is different to avoid cursor jumping
+    const currentParsed = inputValue
+      .split(/[;\n]+/)
+      .map(t => t.trim())
+      .filter(t => t !== '');
+
+    const participantsSet = new Set(participants);
+    const currentSet = new Set(currentParsed);
+
+    // If clearly different sets or size mismatch (especially clear all case)
+    if (participants.length !== currentParsed.length ||
+      !participants.every(p => currentSet.has(p))) {
+      setInputValue(participants.join('\n'));
     }
   }, [participants]);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value;
     setInputValue(val);
-    
+
     const list = val
       .split(/[;\n]+/)
       .map(name => name.trim())
       .filter(name => name !== '');
-    
+
     setParticipants(list);
   };
 
@@ -56,7 +66,7 @@ const RaffleControlPanel: React.FC<Props> = ({
         const parts = line.split(',');
         return parts[0].trim();
       }).filter(name => name !== '' && name.toLowerCase() !== 'name');
-      
+
       const combined = Array.from(new Set([...participants, ...names]));
       setParticipants(combined);
       setInputValue(combined.join('\n'));
@@ -84,7 +94,7 @@ const RaffleControlPanel: React.FC<Props> = ({
             <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-mono font-bold">
               {participants.length} 人
             </span>
-            <button 
+            <button
               onClick={deduplicate}
               className="flex-1 sm:flex-none px-4 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xs font-bold transition-all active:scale-95"
             >
@@ -92,7 +102,7 @@ const RaffleControlPanel: React.FC<Props> = ({
             </button>
           </div>
         </div>
-        
+
         <textarea
           disabled={isDrawing}
           value={inputValue}
@@ -101,9 +111,9 @@ const RaffleControlPanel: React.FC<Props> = ({
           placeholder="請輸入抽獎姓名..."
           className="min-h-[250px] lg:h-full w-full bg-black/40 border border-white/10 rounded-2xl p-4 md:p-6 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none font-medium placeholder:text-gray-700 transition-all shadow-inner leading-relaxed"
         />
-        
+
         <div className="flex flex-col sm:flex-row gap-3">
-           <button 
+          <button
             onClick={() => fileInputRef.current?.click()}
             className="flex-1 flex items-center justify-center gap-2 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-bold transition-all active:scale-[0.98]"
           >
@@ -113,8 +123,8 @@ const RaffleControlPanel: React.FC<Props> = ({
             匯入名單
           </button>
           <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".csv,.txt" className="hidden" />
-          
-          <button 
+
+          <button
             onClick={onClear}
             className="px-6 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl font-bold transition-all"
           >
@@ -126,33 +136,33 @@ const RaffleControlPanel: React.FC<Props> = ({
       {/* Settings */}
       <div className="flex flex-col gap-6 p-4 md:p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm">
         <label className="text-sm font-black text-gray-400 uppercase tracking-widest">抽獎設定</label>
-        
+
         <div className="space-y-6">
           <div className="p-5 rounded-2xl bg-black/30 border border-white/5 shadow-inner">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-bold text-gray-300">單次抽取人數</span>
               <span className="text-3xl font-black text-purple-400">{settings.drawCount}</span>
             </div>
-            <input 
-              type="range" 
-              min="1" 
+            <input
+              type="range"
+              min="1"
               max={Math.max(1, participants.length)}
               value={settings.drawCount}
               onChange={(e) => setSettings(prev => ({ ...prev, drawCount: parseInt(e.target.value) || 1 }))}
               className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-purple-500 transition-all"
             />
             <div className="flex justify-between mt-2 text-[10px] text-gray-600 font-bold uppercase">
-                <span>1</span>
-                <span>{participants.length} 人</span>
+              <span>1</span>
+              <span>{participants.length} 人</span>
             </div>
           </div>
 
           <div className="flex items-center justify-between p-5 rounded-2xl bg-black/30 border border-white/5 shadow-inner">
             <div className="flex flex-col">
-                <span className="text-sm font-bold text-gray-300">排除已中獎者</span>
-                <span className="text-[10px] text-gray-500 uppercase">避免重複獲獎</span>
+              <span className="text-sm font-bold text-gray-300">排除已中獎者</span>
+              <span className="text-[10px] text-gray-500 uppercase">避免重複獲獎</span>
             </div>
-            <button 
+            <button
               onClick={() => setSettings(prev => ({ ...prev, excludeWinners: !prev.excludeWinners }))}
               className={`relative w-14 h-7 rounded-full transition-all duration-300 ${settings.excludeWinners ? 'bg-purple-600 shadow-lg shadow-purple-500/30' : 'bg-gray-800'}`}
             >

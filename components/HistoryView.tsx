@@ -10,21 +10,37 @@ interface Props {
 const HistoryView: React.FC<Props> = ({ history }) => {
   const downloadCSV = () => {
     if (history.length === 0) return;
-    
-    let csvContent = "data:text/csv;charset=utf-8,Round,Timestamp,Winners\n";
-    history.forEach(round => {
-      const time = new Date(round.timestamp).toLocaleString();
-      const winners = round.winners.join(";");
-      csvContent += `${round.round},"${time}","${winners}"\n`;
+
+    // Excel usually expects a BOM for UTF-8 and sometimes "sep=," at the start.
+    // We will use standard comma separation and BOM.
+    const headers = ["Round", "Timestamp", "Winners"];
+
+    const rows = history.map(round => {
+      // Escape quotes in content
+      const time = new Date(round.timestamp).toLocaleString().replace(/"/g, '""');
+      const winners = round.winners.join(";").replace(/"/g, '""');
+
+      return [
+        round.round,
+        `"${time}"`,
+        `"${winners}"`
+      ].join(",");
     });
 
-    const encodedUri = encodeURI(csvContent);
+    // Combine with BOM
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "lucky_draw_results.csv");
+    link.href = url;
+    link.download = `lucky_draw_results_${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(link);
     link.click();
+
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -42,7 +58,7 @@ const HistoryView: React.FC<Props> = ({ history }) => {
       {/* 下載按鈕區塊 */}
       {history.length > 0 && (
         <div className="flex">
-          <button 
+          <button
             onClick={downloadCSV}
             className="flex items-center gap-2 px-6 py-4 bg-white text-black font-black rounded-2xl hover:bg-gray-200 transition-all shadow-xl active:scale-95 group"
           >
@@ -67,7 +83,7 @@ const HistoryView: React.FC<Props> = ({ history }) => {
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {history.map((item) => (
-              <motion.div 
+              <motion.div
                 key={item.id}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -77,7 +93,7 @@ const HistoryView: React.FC<Props> = ({ history }) => {
                   <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">ROUND</span>
                   <span className="text-4xl font-black text-white">{item.round}</span>
                 </div>
-                
+
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-3 mb-4">
                     <span className="text-xs font-mono text-gray-500 bg-black/40 px-3 py-1.5 rounded-full border border-white/5">
@@ -97,11 +113,11 @@ const HistoryView: React.FC<Props> = ({ history }) => {
                 </div>
 
                 <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                   <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center text-green-400 border border-green-500/20">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                   </div>
+                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center text-green-400 border border-green-500/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
                 </div>
               </motion.div>
             ))}
